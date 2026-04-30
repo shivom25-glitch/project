@@ -475,6 +475,8 @@
 
             <!-- Aim Sections -->
             <div class="aim-sections">
+                </div> <div id="dynamic-content" class="question-section" style="display:none; margin-top: 20px;">
+                </div>
                 <div class="section-card active">
                     <i class="fas fa-bullseye"></i>
                     <h3>Aim</h3>
@@ -564,17 +566,39 @@
         });
 
         // Section cards interaction
-        const sectionCards = document.querySelectorAll('.section-card');
-        sectionCards.forEach(card => {
-            card.addEventListener('click', () => {
-                sectionCards.forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                
-                // In a real application, this would load the corresponding content
-                const sectionName = card.querySelector('h3').textContent;
-                console.log(`Loading ${sectionName} section...`);
+       // Get the display area we created in Step 1
+            const displayArea = document.getElementById('dynamic-content');
+            const sectionCards = document.querySelectorAll('.section-card');
+
+            sectionCards.forEach(card => {
+                card.addEventListener('click', () => {
+        // 1. Visual Feedback: Highlight the clicked card
+            sectionCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        
+            // 2. Identify which file to load
+        // This takes the <h3> text (e.g., "Aim") and makes it "aim.html"
+            const sectionName = card.querySelector('h3').textContent.toLowerCase().trim();
+            const fileName = sectionName + ".html"; 
+
+        // 3. Fetch and Inject the file
+                fetch(fileName)
+                .then(response => {
+                if (!response.ok) throw new Error('File not found');
+                return response.text();
+            })
+            .then(data => {
+                displayArea.innerHTML = data; // Put the aim.html content here
+                displayArea.style.display = 'block'; // Make the section visible
+                displayArea.scrollIntoView({ behavior: 'smooth' }); // Scroll to it
+            })
+            .catch(err => {
+                console.error(err);
+                displayArea.innerHTML = `<p style="color:red;">Error: Could not load "${fileName}". Make sure the file is in the same folder.</p>`;
+                displayArea.style.display = 'block';
             });
-        });
+    });
+});
 
         // Feedback button interaction
         const feedbackButton = document.querySelector('.feedback-button');
