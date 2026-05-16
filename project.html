@@ -6,6 +6,16 @@
     <title>Virtual Labs - LAUC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-main: #34495e;
+            --link-color: #2980b9;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +24,7 @@
         }
 
         body {
-            background-color: #f8f9fa;
+            background: var(--bg-gradient);
             color: #333;
             line-height: 1.6;
         }
@@ -222,6 +232,9 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         .section-card:hover {
@@ -469,59 +482,57 @@
         <main class="content">
             <div class="content-header">
                 
-                <h2>A Virtual Lab on Rank of Matrix</h2>
+                <h2>A Virtual Lab on Fourier Law of Heat Conduction</h2>
                 <p>Engineering Mathematics Experiment</p>
             </div>
 
             <!-- Aim Sections -->
             <div class="aim-sections">
-                <div class="section-card active">
+                <a class="section-card active" href="aim.html">
                     <i class="fas fa-bullseye"></i>
                     <h3>Aim</h3>
                     <p>Objective of the experiment</p>
-                </div>
-                <div class="section-card">
+                </a>
+                <a class="section-card" href="theory.html">
                     <i class="fas fa-book"></i>
                     <h3>Theory</h3>
                     <p>Background concepts</p>
-                </div>
-                <div class="section-card">
+                </a>
+                <a class="section-card" href="pretest.html">
                     <i class="fas fa-question-circle"></i>
                     <h3>Pretest</h3>
                     <p>Pre-experiment assessment</p>
-                </div>
+                </a>
                 <div class="section-card">
                     <i class="fas fa-desktop"></i>
                     <h3>Simulation</h3>
                     <p>Interactive simulation</p>
                 </div>
-                <div class="section-card">
+                <a class="section-card" href="posttest.html">
                     <i class="fas fa-clipboard-check"></i>
                     <h3>Posttest</h3>
                     <p>Post-experiment assessment</p>
-                </div>
-                <div class="section-card">
+                </a>
+                <a class="section-card" href="references.html">
                     <i class="fas fa-book-open"></i>
                     <h3>References</h3>
                     <p>Further reading materials</p>
-                </div>
-                <div class="section-card">
+                </a>
+                <a class="section-card" href="contributors.html">
                     <i class="fas fa-users"></i>
                     <h3>Contributors</h3>
                     <p>People involved</p>
-                </div>
-                <div class="section-card feedback-card">
+                </a>
+                <a class="section-card feedback-card" href="feedback.html">
                     <i class="fas fa-comment-alt"></i>
                     <h3>Feedback</h3>
                     <p>Share your experience</p>
-                </div>        
+                </a>        
             </div>
 
     <!-- Footer -->
     <footer class="container">
-        <p>Virtual Labs &copy; 2025 | Applied Sciences & Humanities Department | 
-           <span class="footer-logo">Pimpri Chinchwad College of Engineering</span>
-        </p>
+        <p>© 2026 Virtual Heat Laboratory • Educational Resource</p>
     </footer>
 
     <script>
@@ -578,9 +589,11 @@
 
         // Feedback button interaction
         const feedbackButton = document.querySelector('.feedback-button');
-        feedbackButton.addEventListener('click', () => {
-            alert('Thank you for your willingness to provide feedback! In a real application, this would open a feedback form.');
-        });
+        if (feedbackButton) {
+            feedbackButton.addEventListener('click', () => {
+                alert('Thank you for your willingness to provide feedback! In a real application, this would open a feedback form.');
+            });
+        }
 
         // Simulate active section based on URL or user interaction
         document.addEventListener('DOMContentLoaded', () => {
