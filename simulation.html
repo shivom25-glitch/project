@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation - Heat Flow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --wrong: #e74c3c;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-main: #34495e;
+            --accent-blue: #ebf5fb;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes popIn { 
+            0% { transform: scale(0.8); opacity: 0; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 40px 20px; 
+            background: var(--bg-gradient); 
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+        }
+        
+        h2 {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .back-link:hover { transform: translateX(-5px); }
+
+        hr { border: none; border-bottom: 2px solid rgba(0,0,0,0.05); margin-bottom: 30px; }
+
+        .note { 
+            background: #fffde7; 
+            padding: 15px 20px; 
+            border-left: 5px solid #fbc02d; 
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 25px; 
+            color: #856404; 
+            font-weight: 500;
+            animation: fadeInUp 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Persistent Image Styling */
+        #persistent-image-container { text-align: center; margin-bottom: 25px; }
+        #imgPreview { 
+            max-width: 100%; 
+            max-height: 350px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            display: none; 
+        }
+        
+        .section { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            margin-bottom: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: none; 
+        }
+
+        .section.active { 
+            display: block; 
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+        
+        h3 {
+            color: var(--primary);
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
+            margin-top: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--secondary);
+            margin: 15px 0 8px;
+        }
+
+        /* Remove arrows from number inputs */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        input[type="number"], input[type="file"] { 
+            -moz-appearance: textfield; 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #edf2f7; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f8fbfe;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        button { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            transition: all 0.3s ease; 
+            margin-top: 15px; 
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        button:hover:not(:disabled) { 
+            background: var(--secondary); 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        button:disabled { 
+            background: #bdc3c7; 
+            cursor: not-allowed; 
+            box-shadow: none;
+            transform: none;
+        }
+
+        .hint { 
+            color: var(--wrong); 
+            font-weight: bold; 
+            margin-top: 10px; 
+            display: inline-block; 
+            padding: 10px 15px; 
+            background: #fdf0ed; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--wrong); 
+        }
+
+        .success { 
+            color: var(--success); 
+            font-weight: bold; 
+            margin-top: 10px; 
+            display: inline-block; 
+            padding: 10px 15px; 
+            background: #eafaf1; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--success); 
+        }
+
+        .formula-btn { 
+            display: block; 
+            width: 100%; 
+            margin: 12px 0; 
+            background: #f8fbfe; 
+            color: var(--text-main); 
+            text-align: left; 
+            padding: 15px 20px; 
+            border: 2px solid #edf2f7; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            font-weight: 500; 
+            box-shadow: none;
+        }
+
+        .formula-btn:hover { 
+            background: white; 
+            border-color: var(--primary); 
+            transform: translateX(5px); 
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.1); 
+        }
+
+        .nav-btn { 
+            background: var(--success); 
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .nav-btn:hover:not(:disabled) { 
+            background: #27ae60; 
+        }
+        
+        /* Motivation Message Styling */
+        #motivation-msg { 
+            display: none; 
+            background: white; 
+            color: var(--success); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 2px solid var(--success); 
+            text-align: center; 
+            margin-top: 30px; 
+            font-size: 1.3rem; 
+            box-shadow: 0 15px 35px rgba(46, 204, 113, 0.2); 
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-laptop-code" style="color: var(--primary); margin-right: 10px;"></i> Heat Flow Calculation Simulation</h2>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    <hr>
+
+    <div class="note">
+        📝 <b>Note:</b> Please keep a scientific calculator handy for precise calculations (especially for natural logs and Pi).
+    </div>
+
+    <div id="persistent-image-container">
+        <img id="imgPreview" alt="Reference Image"/>
+    </div>
+
+    <div class="section active" id="sec-image">
+        <h3><i class="fas fa-image"></i> 1. Reference Image (Optional)</h3>
+        <p>Upload the question image for your reference. It will remain visible at the top during calculations.</p>
+        <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+        <br><br>
+        <button type="button" class="nav-btn" onclick="nextSection('sec-image', 'sec-inputs')" id="btn_start">Start Simulation <i class="fas fa-play" style="margin-left: 8px;"></i></button>
+    </div>
+
+    <div class="section" id="sec-inputs">
+        <h3><i class="fas fa-keyboard"></i> 2. Enter Given Values</h3>
+        <label>Inside Temperature (t0) [°C]:</label> <input type="number" id="t0" value="100" autocomplete="off">
+        <label>Outside Temperature (t1) [°C]:</label> <input type="number" id="t1" value="20" autocomplete="off">
+        <label>Inside Radius (x0) <b>[cm]</b>:</label> <input type="number" id="x0" value="5" autocomplete="off">
+        <label>Outside Radius (x1) <b>[cm]</b>:</label> <input type="number" id="x1" value="10" autocomplete="off">
+        <label>Length of Pipe (L) <b>[cm]</b>:</label> <input type="number" id="L" value="200" autocomplete="off">
+        <label>Thermal Conductivity (k) <b>[W/cm·K]</b>:</label> <input type="number" id="k" value="0.15" autocomplete="off">
+        <label>Time of Flow (t) <b>[seconds]</b>:</label> <input type="number" id="time_sec" value="60" autocomplete="off">
+        <button type="button" class="nav-btn" onclick="nextSection('sec-inputs', 'sec-formula')" id="btn_save_inputs">Save & Continue <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
+    </div>
+
+    <div class="section" id="sec-formula">
+        <h3><i class="fas fa-square-root-alt"></i> 3. Select the Correct Formula</h3>
+        <p>Which formula is correct for total radial heat transfer in a <b>Cylindrical Pipe</b> over time?</p>
+        <button type="button" class="formula-btn" onclick="checkFormula(1)">1. Q = k * A * (t0 - t1) * time / (x1 - x0) [Flat Wall]</button>
+        <button type="button" class="formula-btn" onclick="checkFormula(2)">2. Q = 2 * π * k * L * (t0 - t1) * time / ln(x1/x0) [Cylinder]</button>
+        <button type="button" class="formula-btn" onclick="checkFormula(3)">3. Q = 4 * π * k * (t0 - t1) * time / (1/x0 - 1/x1) [Sphere]</button>
+        <div id="formula-msg"></div>
+    </div>
+
+    <div class="section" id="sec-step1">
+        <h3><i class="fas fa-calculator"></i> 4. Intermediate Calculations</h3>
+        <label>Calculate (t0 - t1):</label>
+        <input type="number" id="val_delta_t" autocomplete="off">
+        <button type="button" onclick="validateStep('delta_t', 'val_delta_t', 'msg_delta_t')" id="btn_delta_t">Check</button>
+        <div id="msg_delta_t"></div><br>
+
+        <label>Calculate ln(x1 / x0):</label>
+        <input type="number" id="val_log_x" autocomplete="off">
+        <button type="button" onclick="validateStep('log_x', 'val_log_x', 'msg_log_x')" id="btn_log_x">Check</button>
+        <div id="msg_log_x"></div><br>
+
+        <button type="button" class="nav-btn" onclick="nextSection('sec-step1', 'sec-step2')" id="btn-next1" style="display:none;">Next Step <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
+    </div>
+
+    <div class="section" id="sec-step2">
+        <h3><i class="fas fa-layer-group"></i> 5. Calculate Base Q</h3>
+        <p>Base Q = (t0 - t1) / ln(x1/x0)</p>
+        <input type="number" id="val_base_q" autocomplete="off">
+        <button type="button" onclick="validateStep('base_q', 'val_base_q', 'msg_base_q')" id="btn_base_q">Check</button>
+        <div id="msg_base_q"></div>
+        <br>
+        <button type="button" class="nav-btn" onclick="nextSection('sec-step2', 'sec-step3')" id="btn-next2" style="display:none;">Next Step <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
+    </div>
+
+    <div class="section" id="sec-step3">
+        <h3><i class="fas fa-flag-checkered"></i> 6. Final Calculation</h3>
+        <label>Calculate Multiplying Factor (2 * π * k * L * time):</label>
+        <p style="font-size: 0.9em; color: #555;"><i>*Note: Since L is in cm and k is in W/cm·K, no unit conversions are needed! Just multiply them directly.</i></p>
+        <input type="number" id="val_factor" autocomplete="off">
+        <button type="button" onclick="validateStep('factor', 'val_factor', 'msg_factor')" id="btn_factor">Check</button>
+        <div id="msg_factor"></div><br>
+
+        <label>Calculate Total Heat Transfer Q (Multiplying Factor * Base Q) [Joules]:</label>
+        <input type="number" id="val_final_q" autocomplete="off">
+        <button type="button" onclick="validateStep('final_q', 'val_final_q', 'msg_final_q')" id="btn_final_q">Check</button>
+        <div id="msg_final_q"></div>
+    </div>
+
+    <div id="motivation-msg">
+        <i class="fas fa-trophy" style="font-size: 2rem; color: #f1c40f; margin-bottom: 15px; display: block;"></i>
+        🎉 <b>Outstanding Job!</b> 🎉<br>
+        You have successfully calculated the heat transfer with perfect accuracy! You've mastered Fourier's Law for Cylindrical coordinates. Keep up the brilliant work! 🚀
+    </div>
+</div>
+
+<script>
+    let attempts = {};
+
+    // 1. Safe Wheel Event (Prevents number scrolling)
+    try {
+        document.addEventListener("wheel", function(event){
+            if(document.activeElement && document.activeElement.type === "number"){
+                document.activeElement.blur(); 
+            }
+        }, { passive: true });
+    } catch (e) { console.warn("Wheel event issue:", e); }
+
+    // 2. Safe Enter Key Navigation
+    try {
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                const active = document.activeElement;
+                if (active && active.tagName === "INPUT" && active.type === "number") {
+                    event.preventDefault(); 
+                    
+                    const enterNavMap = {
+                        't0': 't1', 't1': 'x0', 'x0': 'x1', 'x1': 'L', 'L': 'k',
+                        'k': 'time_sec', 'time_sec': 'btn_save_inputs', 
+                        'val_delta_t': 'btn_delta_t', 'val_log_x': 'btn_log_x',
+                        'val_base_q': 'btn_base_q', 'val_factor': 'btn_factor',
+                        'val_final_q': 'btn_final_q'
+                    };
+
+                    const nextId = enterNavMap[active.id];
+                    if (nextId) {
+                        const nextElem = document.getElementById(nextId);
+                        if (nextElem) {
+                            if (nextElem.tagName === "BUTTON") {
+                                nextElem.click(); 
+                            } else {
+                                nextElem.focus(); 
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) { console.warn("Keydown event issue:", e); }
+
+    // 3. Image Upload
+    function previewImage(event) {
+        try {
+            if (!event.target.files || event.target.files.length === 0) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(){
+                const output = document.getElementById('imgPreview');
+                output.src = reader.result;
+                output.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        } catch (e) {
+            console.error("Image upload failed:", e);
+        }
+    }
+
+    // 4. Move to Next Section
+    function nextSection(currentId, nextId) {
+        try {
+            document.getElementById(currentId).classList.remove('active');
+            document.getElementById(nextId).classList.add('active');
+            
+            const firstInput = document.getElementById(nextId).querySelector('input[type="number"]');
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 150); 
+            }
+        } catch (e) {
+            console.error("Navigation failed:", e);
+        }
+    }
+
+    // 5. Formula Check
+    function checkFormula(choice) {
+        const msgBox = document.getElementById('formula-msg');
+        if(choice === 2) {
+            msgBox.innerHTML = '<span class="success">Correct! Formula 2 is for cylindrical pipes.</span>';
+            setTimeout(() => nextSection('sec-formula', 'sec-step1'), 1500);
+        } else {
+            msgBox.innerHTML = '<span class="hint">Incorrect. Look for the formula containing natural log (ln) and Length (L).</span>';
+        }
+    }
+
+    // 6. Validation Math
+    function validateStep(stepName, inputId, msgId) {
+        try {
+            if (!attempts[stepName]) attempts[stepName] = 0;
+
+            const t0 = parseFloat(document.getElementById('t0').value) || 0;
+            const t1 = parseFloat(document.getElementById('t1').value) || 0;
+            const x0 = parseFloat(document.getElementById('x0').value) || 1;
+            const x1 = parseFloat(document.getElementById('x1').value) || 1;
+            const k = parseFloat(document.getElementById('k').value) || 0; // k is now exactly in W/cm*K
+            const L_cm = parseFloat(document.getElementById('L').value) || 1;
+            const time_sec = parseFloat(document.getElementById('time_sec').value) || 1;
+            const userVal = parseFloat(document.getElementById(inputId).value) || 0;
+
+            let correctVal = 0;
+            let hint = "";
+            const tolerance = (stepName === "final_q" || stepName === "factor") ? 5.0 : 0.05;
+
+            if (stepName === "delta_t") {
+                correctVal = t0 - t1;
+                hint = `Hint: Subtract t1 from t0. (${t0} - ${t1})`;
+            } else if (stepName === "log_x") {
+                correctVal = Math.log(x1 / x0); 
+                hint = `Hint: Calculate the natural logarithm (ln) of x1 divided by x0. ln(${x1}/${x0})`;
+            } else if (stepName === "base_q") {
+                correctVal = (t0 - t1) / Math.log(x1 / x0);
+                hint = `Hint: Divide your (t0 - t1) result by your ln(x1/x0) result.`;
+            } else if (stepName === "factor") {
+                // Using k directly (W/cm*K) and L directly (cm)
+                correctVal = 2 * Math.PI * k * L_cm * time_sec;
+                hint = `Hint: 2 * π * k * L * time. (2 * 3.14159 * ${k} * ${L_cm} * ${time_sec})`;
+            } else if (stepName === "final_q") {
+                correctVal = ((2 * Math.PI * k * L_cm * time_sec) * (t0 - t1)) / Math.log(x1 / x0);
+                hint = `Hint: Multiply your Base Q by your Multiplying Factor.`;
+            }
+
+            const isCorrect = Math.abs(userVal - correctVal) <= tolerance;
+            const msgBox = document.getElementById(msgId);
+            const btnId = `btn_${stepName}`;
+
+            if (isCorrect) {
+                msgBox.innerHTML = `<span class="success">Correct!</span>`;
+                document.getElementById(inputId).disabled = true;
+                document.getElementById(btnId).disabled = true;
+                checkSectionCompletion(stepName);
+            } else {
+                attempts[stepName]++;
+                if (attempts[stepName] >= 3) {
+                    msgBox.innerHTML = `<span class="hint">Incorrect. ${hint}</span>`;
+                } else {
+                    msgBox.innerHTML = `<span class="hint">Incorrect. Try again! (Attempt ${attempts[stepName]}/3)</span>`;
+                }
+            }
+        } catch (e) {
+            console.error("Validation error on step " + stepName + ":", e);
+        }
+    }
+
+    function checkSectionCompletion(stepName) {
+        if(stepName === 'delta_t' || stepName === 'log_x') {
+            if(document.getElementById('val_delta_t').disabled && document.getElementById('val_log_x').disabled) {
+                document.getElementById('btn-next1').style.display = 'block';
+                document.getElementById('btn-next1').focus(); 
+            }
+        }
+        if(stepName === 'base_q') {
+            document.getElementById('btn-next2').style.display = 'block';
+            document.getElementById('btn-next2').focus();
+        }
+        if(stepName === 'final_q') {
+            document.getElementById('motivation-msg').style.display = 'block';
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 200);
+        }
+    }
+</script>
+
+</body>
+</html>
